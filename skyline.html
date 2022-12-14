@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	
+	<title>Gene Skyline</title>
+	
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<!-- D3.js -->
+	<script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+	<!-- Treeview -->
+	<script src="//cdn.jsdelivr.net/npm/jquery.fancytree@2.27/dist/jquery.fancytree-all-deps.min.js"></script>
+	<!-- Autocompletion -->
+	<script src="resources/typeahead.js/typeahead.bundle.min.js" type="text/javascript"></script>
+	<!-- PNG and PDF generation -->
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+	<script type="text/javascript" src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+	<!-- Bootstrap-select -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.7/dist/js/bootstrap-select.min.js"></script>
+	
+    <!-- Bootstrap JS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<!-- Bootstrap-select -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.7/dist/css/bootstrap-select.min.css">
+	<!-- Treeview -->
+	<link href="//cdn.jsdelivr.net/npm/jquery.fancytree@2.27/dist/skin-win8/ui.fancytree.min.css" rel="stylesheet">
+	<!-- Custom CSS -->
+	<link rel="stylesheet" type="text/css" href="skyline.css">
+			
+</head>
+
+<body>
+
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MJTPRGT"
+	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+
+	<div id="tooltip" class="hidden">
+		<p><strong>Population: </strong><span id="population"></span></p>
+        <p><strong>Expression Value: </strong><span id="expr_value" style="color:red;font-weight:bold;"></span></p>
+        <p><strong>Long Name: </strong><span id="long_name"></span></p>
+        <p><strong>Description: </strong><span id="desc"></span></p>
+        <p><strong>Author: </strong><span id="author"></span></p>
+        <p><strong>Number of Samples: </strong><span id="number_of_sample"></span></p>
+    </div>
+    <div id="tooltip_y_axis" class="hidden">
+		<p><strong>Population: </strong><span id="population_y_axis"></span></p>
+       	<p><strong>Long Name: </strong><span id="long_name_y_axis"></span></p>
+       	<p><strong>Description: </strong><span id="desc_y_axis"></span></p>
+       	<p><strong>Author: </strong><span id="author_y_axis"></span></p>
+       	<p><strong>Number of Samples: </strong><span id="number_of_sample_y_axis"></span></p>
+    </div>
+    <div id="tooltip_legend" class="hidden">
+		<p><strong><span id="level"></span>:</strong>&nbsp;&nbsp;<span id="level_range" style="color:red;font-weight:bold;"></span></p>
+    </div>
+       
+    <div id="AlertModal_genesymbol" class="modal fade" role="dialog" aria-labelledby="AlertModal_genesymbol_Label" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="AlertModal_genesymbol_Label">Alert</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>Sorry! The gene symbol can NOT be found.</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div id="AlertModal_population" class="modal fade" role="dialog" aria-labelledby="AlertModal_population_Label" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="AlertModal_population_Label">Alert</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>Please select at least one population!</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+        
+	<div id="AlertModal_sorting_info" class="modal fade" role="dialog" aria-labelledby="AlertModal_sorting_info_Label" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="AlertModal_sorting_info_Label">Alert</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>Sorry! The sorting information is NOT available.</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+        
+	<div id="AlertModal_IE_save_image" class="modal fade" role="dialog" aria-labelledby="AlertModal_IE_save_image_Label" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="AlertModal_IE_save_image_Label">Alert</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>Sorry! Internet Explorer does not support the download function. Please right-click the figure and choose 'Save picture as'.</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div id="AlertModal_IE_save_pdf" class="modal fade" role="dialog" aria-labelledby="AlertModal_IE_save_pdf_Label" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="AlertModal_IE_save_pdf_Label">Alert</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>Sorry! Internet Explorer does not support the download function. Please try Chrome or Firefox.</p>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade" id="EmailModal" role="dialog" aria-labelledby="EmailModal_Label" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="EmailModal_Label">Send Current Plot by Email</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <form name="sendMail" id="sendMailForm">
+	          <div class="form-group">
+	            <label for="sender_email" class="col-form-label">From (required):</label>
+	            <input type="email" class="form-control" id="from_email" placeholder="Email Address" required>
+	          </div>
+	          <div class="form-group">
+	            <label for="email" class="col-form-label">To (required; separated by commas if multiple emails):</label>
+	            <input type="email" class="form-control" id="to_email" placeholder="Email Address(es)" multiple required>
+	          </div>
+	          <div class="form-group">
+	            <label for="message-text" class="col-form-label">Message (optional):</label>
+	            <textarea class="form-control" id="message-text" placeholder="Here is a Gene Skyline plot from ImmGen."></textarea>
+	          </div>
+	          <!-- Notifications for 'error' Or 'successfully'-->
+	          <div class="col-md-12 mailResponse" style="display:none;">
+	            <div class="alert alert-dismissible" role="alert">
+	              <p class="mailResponseText"></p>
+	            </div>
+	          </div>
+		  <button type="submit" class="btn btn-primary" id="send_email">Send Email</button>
+	        </form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close_email_form">Close</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="form-group text-center"><img src="images/RNAseqskylineheaderOct19.svg" class="img-fluid" alt="Responsive image" width="50%"></div>
+	
+	<hr id="hr" style="width:95%;">
+	
+	<div class="container-fluid" style="width:95%">
+	  <div class="row">
+	    <div class="col-12 col-lg-4">
+	      <div class="card border-0 shadow p-3 mb-5 bg-white rounded">
+	        <div class="card-body">
+	          <form>
+	            <div class="form-group row">
+	              <label class="col-form-label col-12 col-lg-4" for="rnaseq_datagroup_list"><b>Data Group:</b></label>
+	        	<div class="col-12 col-lg-8 btn-group-vertical btn-group-toggle" data-toggle="buttons" id="rnaseq_datagroup_list">
+    		          <label class="btn btn-light active" style="cursor:pointer">
+    		            <input type="radio" autocomplete="off" value="ImmGen ULI RNASeq" checked> ImmGen ULI RNASeq
+    		          </label>
+    		          <label class="btn btn-light" style="cursor:pointer">
+    		            <input type="radio" autocomplete="off" value="ImmGen MNP OpenSource"> ImmGen MNP OpenSource
+    		          </label>
+	        	</div>
+	            </div>
+	            <div class="form-group row">
+	              <label class="col-form-label col-12 col-lg-4" for="rnaseq_population_list"><b>Populations:</b></label>
+	        	<div class="col-12 col-lg-8 btn-group-vertical btn-group-toggle" data-toggle="buttons" id="rnaseq_population_list">
+    		          <label class="btn btn-light active" style="cursor:pointer">
+    		            <input type="radio" autocomplete="off" id="ref_pops" value="Reference populations" checked> Reference populations
+    		          </label>
+    		          <label class="btn btn-light" style="cursor:pointer">
+    		            <input type="radio" autocomplete="off" id="all_pops" value="Select the populations of interest"> Select the populations by cell types
+    		          </label>
+    		          <div id="rnaseq_population_tree" style="display: none; width:100%"></div>
+    		          <div id="rnaseq_population_OSMNP_tree" style="display: none; width:100%"></div>
+    		          <label class="btn btn-light" style="cursor:pointer">
+    		            <input type="radio" autocomplete="off" id="all_pops_by_organ" value="Select the populations of interest by organs"> Select the populations by organs
+    		          </label>
+    		          <div id="rnaseq_population_tree_by_organ" style="display: none; width:100%"></div>
+    		          <div id="rnaseq_population_OSMNP_tree_by_organ" style="display: none; width:100%"></div>
+	        	</div>
+    		          
+    		        
+	            </div>
+                    <fieldset class="form-group">
+                      <div class="row">
+	                <legend class="col-form-label col-12 col-lg-4" for="rnaseq_GeneList"><b>Gene Symbol:</b></legend>
+	                <div id="rnaseq_GeneList" class="col-12 col-lg-8">
+	                  <input type="text" class="typeahead" id="rnaseq_Gene" placeholder="Search Gene ...">
+	                  <div class="form-check">
+	                  	<input class="form-check-input" type="checkbox" value="checked" id="alias_option" onclick = "refresh_rnaseq_genelist()">
+	                  	<label class="form-check-label" for="alias_option">
+	                  	Include Aliases
+	                  	</label>
+	                  </div>
+                        </div>
+                      </div>
+    		    </fieldset>
+                    <div class="form-group row">
+	              <label class="col-form-label col-12 col-lg-4" for="rnaseq_scaling_list"><b>Scaling:</b></label>
+	                <select id="rnaseq_scaling_list" class="selectpicker show-tick col-12 col-lg-8" data-width="100%" data-container="body">
+	                  <option>Local</option>
+                          <option>Local (log10)</option>
+			  <option>Global</option>
+			  <option>Global (log10)</option>
+	                </select>
+    		    </div>
+    		    <hr>
+                    <div class="text-center">
+                      <button type="button" class="btn btn-primary" id="rnaseq_submit" value="">Submit</button>
+                    </div>
+    		  </form>
+    		</div>
+    	      </div>
+    	                    
+    	      <div class="card border-0 shadow p-3 mb-5 bg-white rounded" id="rnaseq_meta_info" style="display:none">
+	      <div class="metainfo" id="rnaseq_metainfo_table">
+  		<table class="table table-hover table-bordered">
+		  <tbody>
+		    <tr>
+		      <th scope="row" class="table-info" width="30%">Gene Symbol</th>
+		      <td id="rnaseq_gene_symbol"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">Gene Full Name</th>
+		      <td id="rnaseq_gene_name"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">Synonyms</th>
+		      <td id="rnaseq_synonyms"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info" title="Summary is not available for the mouse gene. This summary is from the human ortholog.">Summary<br/><h6>(from the human ortholog)</h6></th>
+		      <td>
+		      	<div id="rnaseq_summary" style="height: 85px; overflow:auto;"></div>
+		      </td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">Feature Type</th>
+		      <td id="rnaseq_type"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">Genome Position</th>
+		      <td id="rnaseq_seq_map"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">LinkOut</th>
+		      <td id="rnaseq_linkout"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">Human Ortholog</th>
+		      <td id="rnaseq_human_orthology"></td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info" title="Only the GO term validated by experimental evidence is shown">Gene Ontology</th>
+		      <td>
+		      	<div id="rnaseq_GO" style="height: 90px; overflow:auto;"></div>
+		      	<div id="rnaseq_GO_showAll" style="border: 1px solid lightgray; height: 2em; line-height: 2em; text-align:center"></div>
+		      </td>
+		    </tr>
+		    <tr>
+		      <th scope="row" class="table-info">KEGG Pathway</th>
+		      <td>
+		      	<div id="rnaseq_kegg" style="height: 90px; overflow:auto;"></div>
+		      </td>
+		    </tr>
+		    <!-- <tr>
+		      <th scope="row" class="table-info">Reactome Pathway</th>
+		      <td>
+		      	<div id="rnaseq_reactome" style="height: 90px; overflow:auto;"></div>
+		      </td>
+		    </tr> -->
+		  </tbody>
+		</table>
+	      </div>
+	      </div>
+    	    </div>
+
+    	    
+    	    
+	    <div class="col-12 col-lg-8 card border-0" id="chart_card">
+    	<div id="link_option" class="form-group" align="right" style="display:none">
+  		<button type="button" class="btn btn-info btn-sm" id="microarray_skyline_btn" value="">Microarray Gene Skyline</button>
+  		<button type="button" class="btn btn-info btn-sm" id="gene_constellation_btn" value="">Gene Constellation</button>
+  		<button type="button" class="btn btn-info btn-sm" id="chromatin_btn" value="">Chromatin</button>
+  		<button type="button" class="btn btn-info btn-sm" id="enhancer_network_btn" value="">Enhancer Networks</button>
+  		<button type="button" class="btn btn-info btn-sm" id="ICA_btn" value="">Human Cell Atlas</button>
+    	</div> 
+	      <div id="chart" style="overflow:auto;"></div>
+	      <div id="immgen_uli_rnaseq_save_option" class="form-group" align="right" style="display:none">
+  		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_save_expr" value="">Save expression data as CSV</button>
+  		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_save_meta" value="">Save meta data as CSV</button>
+  		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_save_as_svg" value="">Save as SVG</button>
+  		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_save_as_png" value="">Save as PNG</button>
+    		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_save_as_pdf" value="">Save as PDF</button>
+    		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_print" value="">Print</button>
+    		<button type="button" class="btn btn-primary btn-sm" id="immgen_uli_rnaseq_email" value="">Send Email</button>
+    	      </div>        
+	      <div id="immgen_OSMNP_uli_rnaseq_save_option" class="form-group" align="right" style="display:none">
+  	  	<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_save_expr" value="">Save expression data as CSV</button>
+  	  	<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_save_meta" value="">Save meta data as CSV</button>
+  		<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_save_as_svg" value="">Save as SVG</button>
+  		<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_save_as_png" value="">Save as PNG</button>
+    		<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_save_as_pdf" value="">Save as PDF</button>
+    		<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_print" value="">Print</button>
+    		<button type="button" class="btn btn-primary btn-sm" id="immgen_OSMNP_uli_rnaseq_email" value="">Send Email</button>
+    	      </div>
+    	    </div>
+	  </div>
+	</div>
+	<hr style="width:95%;">
+        
+	<?php 
+        	include 'main.php'; 
+        ?> 
+	<!-- Hidden <FORM> to submit the SVG data to the server, which will convert it to SVG/PDF/PNG downloadable file.
+        The form is populated and submitted by the JavaScript below. -->
+        <form id="svgform" method="post" action="../MyGeneSet/cgi-bin/download_Skyline.cgi">
+        <input type="hidden" id="output_format" name="output_format" value="">
+        <input type="hidden" id="data" name="data" value="">
+        <input type="hidden" name="rnaseq_group" id="rnaseq_group"></input><br>
+        <input type="hidden" name="rnaseq_OSMNP_group" id="rnaseq_OSMNP_group"></input><br>
+        <input type="hidden" name="rnaseq_group_by_organ" id="rnaseq_group_by_organ"></input><br>
+        <input type="hidden" name="rnaseq_OSMNP_group_by_organ" id="rnaseq_OSMNP_group_by_organ"></input><br>
+        </form>
+        
+        <a id="back2Top" title="Back to top" href="#">&#10148;</a>
+        
+	<script type="text/javascript">
+	
+		var margin = {top: 80, right: 40, bottom: 60, left: 220};
+		
+		var width = document.getElementById("chart").offsetWidth - margin.left - margin.right;
+		var height = window.innerHeight - margin.top - margin.bottom + 360;
+		document.getElementById("rnaseq_metainfo_table").style.height = (height - 250).toString() + "px";
+		document.getElementById("rnaseq_Gene").style.width = ($("#rnaseq_datagroup_list").width()-2).toString() + 'px';
+		$( window ).resize(function() {
+			document.getElementById("rnaseq_Gene").style.width = ($("#rnaseq_datagroup_list").width()-2).toString() + 'px';
+  		});
+		
+		
+		var chart = d3.select("#chart").append("svg")
+					.attr("width", width + margin.left + margin.right-40)
+    					.attr("height", height + margin.top + margin.bottom);
+    		var dataset;    		
+    		var description1, description2;
+    		var human_orthology_gene;
+    		
+    		var datavars = [5, 15, 60, 720, 7200, 1392000];
+    		var prev_width = [0,
+ 					datavars[0],
+ 					datavars[0] +  datavars[1],
+ 					datavars[0] +  datavars[1] +  datavars[2],
+ 					datavars[0] +  datavars[1] +  datavars[2] +  datavars[3], 
+ 					datavars[0] +  datavars[1] +  datavars[2] +  datavars[3] +  datavars[4]
+ 				];
+ 		var prev_width_log = [1,
+ 					datavars[0],
+ 					datavars[0] +  datavars[1],
+ 					datavars[0] +  datavars[1] +  datavars[2],
+ 					datavars[0] +  datavars[1] +  datavars[2] +  datavars[3], 
+ 					datavars[0] +  datavars[1] +  datavars[2] +  datavars[3] +  datavars[4]
+ 				];
+ 		var colors = ["#3288bd","#99d594","#e6f598","#fee08b","#fc8d59","#d53e4f"];
+    		var legend = [["Trace", "0 - 5"], ["Very Low", "5 - 20"], ["Low", "20 - 80"], ["Medium", "80 - 800"], ["High", "800 - 8000"], ["Very High", " > 8000"]];
+
+		
+		var jsonText_gencode_GRCm38 = $.ajax({                                         
+ 			datatype: 'json',      
+ 			url: 'resources/gencode_GRCm38_genes_no_rRNA_20200610.json',               
+			async: false
+		}).responseText;
+		var temp_gencode_GRCm38 = JSON.parse(jsonText_gencode_GRCm38);
+		
+		var gene_info_gencode_GRCm38 = [];
+		var gene_info_gencode_GRCm38_synonyms = [];
+		var gene_info_gencode_GRCm38_protein_coding = [];
+		var hashtable_synonyms = new Object();
+		
+		for(var v in temp_gencode_GRCm38) {
+			var keyname_gencode_GRCm38 = temp_gencode_GRCm38[v]['name'];
+			if(temp_gencode_GRCm38[v]['synonyms'] == 'NA') {
+				hashtable_synonyms[keyname_gencode_GRCm38] = keyname_gencode_GRCm38;
+				gene_info_gencode_GRCm38.push(keyname_gencode_GRCm38);
+				gene_info_gencode_GRCm38_synonyms.push(keyname_gencode_GRCm38);
+			}
+			else if (temp_gencode_GRCm38[v]['synonyms'].search(/\|/i) == -1) {
+				hashtable_synonyms[keyname_gencode_GRCm38] = keyname_gencode_GRCm38;
+				gene_info_gencode_GRCm38.push(keyname_gencode_GRCm38);
+				gene_info_gencode_GRCm38_synonyms.push(keyname_gencode_GRCm38);
+				
+				if(temp_gencode_GRCm38[v]['synonyms'] != keyname_gencode_GRCm38){
+					hashtable_synonyms[temp_gencode_GRCm38[v]['synonyms'] + ' (Alias of ' + keyname_gencode_GRCm38 + ')'] = keyname_gencode_GRCm38;
+					gene_info_gencode_GRCm38_synonyms.push(temp_gencode_GRCm38[v]['synonyms'] + ' (Alias of ' + keyname_gencode_GRCm38 + ')');
+				}
+			}
+			else if (temp_gencode_GRCm38[v]['synonyms'].search(/\|/i) > 0){
+				hashtable_synonyms[keyname_gencode_GRCm38] = keyname_gencode_GRCm38;
+				gene_info_gencode_GRCm38.push(keyname_gencode_GRCm38);
+				gene_info_gencode_GRCm38_synonyms.push(keyname_gencode_GRCm38);
+				
+				var res = temp_gencode_GRCm38[v]['synonyms'].split("|");
+				for(var s in res) {
+					if(res[s] != keyname_gencode_GRCm38){
+						hashtable_synonyms[res[s] + ' (Alias of ' + keyname_gencode_GRCm38 + ')'] = keyname_gencode_GRCm38;
+						gene_info_gencode_GRCm38_synonyms.push(res[s] + ' (Alias of ' + keyname_gencode_GRCm38 + ')');
+					}
+				}
+			}
+			
+			if(temp_gencode_GRCm38[v]['type'] == 'protein coding gene'){
+				gene_info_gencode_GRCm38_protein_coding.push(keyname_gencode_GRCm38);
+			}
+		}
+				
+		var genes_gencode_GRCm38 = new Bloodhound({
+			datumTokenizer: Bloodhound.tokenizers.whitespace,
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: gene_info_gencode_GRCm38
+		});
+		
+		$('#rnaseq_GeneList .typeahead').typeahead({
+		  hint: true,
+		  highlight: true,
+		  minLength: 1
+		},
+		{
+		  name: 'genes',
+		  limit: 100,
+		  source: genes_gencode_GRCm38
+		});
+      		
+		
+		$("#rnaseq_population_tree").fancytree({
+		  checkbox: true,
+		  selectMode: 3,
+		  minExpandLevel: 2,
+		  autoCollapse: true,
+		  source: {
+		  	url: "resources/immgen_uli_rnaseq_samples.json",
+		  	cache: false
+		  },
+		
+		  select: function(event, data) {
+		    	var selNodes = data.tree.getSelectedNodes();
+		    	var selKeys = $.map(selNodes, function(node){
+					   if (node.hasChildren() == false) { return node.key; }
+					});
+			$("#rnaseq_group").text(selKeys.join(","));
+		  }
+		});
+
+		
+		$("#rnaseq_population_OSMNP_tree").fancytree({
+		  checkbox: true,
+		  selectMode: 3,
+		  minExpandLevel: 2,
+		  autoCollapse: true,
+		  source: {
+		  	url: "resources/immgen_OSMNP_uli_rnaseq_samples.json",
+		  	cache: false
+		  },
+		
+		  select: function(event, data) {
+		    	var selNodes = data.tree.getSelectedNodes();
+		    	var selKeys = $.map(selNodes, function(node){
+					   if (node.hasChildren() == false) { return node.key; }
+					});
+			$("#rnaseq_OSMNP_group").text(selKeys.join(","));
+		  }
+		});
+		
+		$("#rnaseq_population_tree_by_organ").fancytree({
+		  checkbox: true,
+		  selectMode: 3,
+		  minExpandLevel: 2,
+		  autoCollapse: true,
+		  source: {
+		  	url: "resources/immgen_uli_rnaseq_samples_by_organ.json",
+		  	cache: false
+		  },
+		
+		  select: function(event, data) {
+		    	var selNodes = data.tree.getSelectedNodes();
+		    	var selKeys = $.map(selNodes, function(node){
+					   if (node.hasChildren() == false) { return node.key; }
+					});
+			$("#rnaseq_group_by_organ").text(selKeys.join(","));
+		  }
+		});
+		
+		$("#rnaseq_population_OSMNP_tree_by_organ").fancytree({
+		  checkbox: true,
+		  selectMode: 3,
+		  minExpandLevel: 2,
+		  autoCollapse: true,
+		  source: {
+		  	url: "resources/immgen_OSMNP_uli_rnaseq_samples_by_organ.json",
+		  	cache: false
+		  },
+		
+		  select: function(event, data) {
+		    	var selNodes = data.tree.getSelectedNodes();
+		    	var selKeys = $.map(selNodes, function(node){
+					   if (node.hasChildren() == false) { return node.key; }
+					});
+			$("#rnaseq_OSMNP_group_by_organ").text(selKeys.join(","));
+		  }
+		});
+		
+		
+    		$("#rnaseq_datagroup_list").click(function(){
+    			var selected_item = $("#rnaseq_datagroup_list label.active input").val();
+    			var selected_pop_list_item = $("#rnaseq_population_list label.active input").val();
+    			
+    			if(selected_item == 'ImmGen MNP OpenSource') {
+    				if(selected_pop_list_item == 'Select the populations of interest'){
+    					document.getElementById('rnaseq_population_tree').style.display = 'block';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    				else if(selected_pop_list_item == 'Select the populations of interest by organs'){
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'block';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    			}
+    			else if(selected_item == 'ImmGen ULI RNASeq') {
+    				if(selected_pop_list_item == 'Select the populations of interest'){
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'block';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    				else if(selected_pop_list_item == 'Select the populations of interest by organs'){
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'block';
+    				}
+    			}
+    			else {
+    				document.getElementById('rnaseq_population_tree').style.display = 'none';
+    				document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    				document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    				document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    			}
+    		});
+    		
+    		$("#rnaseq_population_list").click(function(){
+    			var selected_item = $("#rnaseq_population_list label.active input").val();
+    			var selected_data_group = $("#rnaseq_datagroup_list label.active input").val();
+    			if(selected_item == 'Select the populations of interest') {
+    				if(selected_data_group == 'ImmGen ULI RNASeq') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'block';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    				else if (selected_data_group == 'ImmGen MNP OpenSource') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'block';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    			}
+    			else if(selected_item == 'Select the populations of interest by organs') {
+    				if(selected_data_group == 'ImmGen ULI RNASeq') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'block';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    				else if (selected_data_group == 'ImmGen MNP OpenSource') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'block';
+    				}
+    			}
+    		});
+    		
+    		$("#rnaseq_population_list input:radio").on('change', function() {
+    			var selected_item = $(this).val();
+    			var selected_data_group = $("#rnaseq_datagroup_list label.active input").val();
+    			if(selected_item == 'Select the populations of interest') {
+    				if(selected_data_group == 'ImmGen ULI RNASeq') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'block';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    				else if (selected_data_group == 'ImmGen MNP OpenSource') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'block';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    			}
+    			else if(selected_item == 'Select the populations of interest by organs') {
+    				if(selected_data_group == 'ImmGen ULI RNASeq') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'block';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				}
+    				else if (selected_data_group == 'ImmGen MNP OpenSource') {
+    					document.getElementById('rnaseq_population_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    					document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    					document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'block';
+    				}
+    			}
+    			else if(selected_item == 'Reference populations') {
+    				document.getElementById('rnaseq_population_tree').style.display = 'none';
+    				document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    				document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    				document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    			}
+  
+  		});
+    		
+			
+		window.addEventListener('load', function() {
+			document.getElementById('rnaseq_submit').click();
+		});
+		////////////////////////////////////////////////////////////////
+  			    			
+    			$("#rnaseq_submit").click(function(){
+    			
+    				document.getElementById('rnaseq_population_tree').style.display = 'none';
+    				document.getElementById('rnaseq_population_OSMNP_tree').style.display = 'none';
+    				document.getElementById('rnaseq_population_tree_by_organ').style.display = 'none';
+    				document.getElementById('rnaseq_population_OSMNP_tree_by_organ').style.display = 'none';
+    				
+    				var rnaseq_datagroup = $("#rnaseq_datagroup_list label.active input").val();
+    				
+    				var rnaseq_gene, rnaseq_gene_source;
+    				var rnaseq_gene_input = $("#rnaseq_Gene").val();
+    				var rnaseq_gene_url = "<?php echo $gene ?>"; 
+    				if((rnaseq_gene_url=='None')&&!rnaseq_gene_input){
+    					rnaseq_gene = gene_info_gencode_GRCm38_protein_coding[Math.floor(Math.random() * gene_info_gencode_GRCm38_protein_coding.length)];
+    					rnaseq_gene_source = "Random";
+    				}
+    				else if(rnaseq_gene_url!='None'){
+    					if(rnaseq_gene_input){
+    						rnaseq_gene = rnaseq_gene_input;
+    						rnaseq_gene_source = "Input";
+    					}
+    					else {
+    						rnaseq_gene = rnaseq_gene_url;
+    						rnaseq_gene_source = "URL";
+    					}
+    				}
+    				else if(rnaseq_gene_url=='None'){
+    					if(rnaseq_gene_input){
+    						rnaseq_gene = rnaseq_gene_input;
+    						rnaseq_gene_source = "Input";
+    					}
+    					else {
+    						rnaseq_gene = gene_info_gencode_GRCm38_protein_coding[Math.floor(Math.random() * gene_info_gencode_GRCm38_protein_coding.length)];
+    						rnaseq_gene_source = "Random";
+    					}
+    				}
+    				document.getElementById('rnaseq_Gene').value=rnaseq_gene;
+    				
+				var rnaseq_scale_option = $("#rnaseq_scaling_list").val();
+				var rnaseq_population_option = $("#rnaseq_population_list label.active input").val();
+				var rnaseq_population;
+				
+				if(rnaseq_datagroup == 'ImmGen ULI RNASeq'){
+					if(rnaseq_population_option=='Select the populations of interest'){
+						rnaseq_population = $("#rnaseq_group").text();
+					}
+					else if(rnaseq_population_option=='Select the populations of interest by organs'){
+						rnaseq_population = $("#rnaseq_group_by_organ").text();
+					}
+					document.getElementById('immgen_uli_rnaseq_save_option').style.display="";
+					document.getElementById('immgen_OSMNP_uli_rnaseq_save_option').style.display="none";
+				}
+				else if(rnaseq_datagroup == 'ImmGen MNP OpenSource'){
+					if(rnaseq_population_option=='Select the populations of interest'){
+						rnaseq_population = $("#rnaseq_OSMNP_group").text();
+					}
+					else if(rnaseq_population_option=='Select the populations of interest by organs'){
+						rnaseq_population = $("#rnaseq_OSMNP_group_by_organ").text();
+					}
+					document.getElementById('immgen_uli_rnaseq_save_option').style.display="none";
+					document.getElementById('immgen_OSMNP_uli_rnaseq_save_option').style.display="";
+				}
+				document.getElementById('link_option').style.display="";
+				
+				description1 = "Gene: " + rnaseq_gene;
+				description2 = "Expression Value Normalized by DESeq2";
+				
+				if(((rnaseq_population_option=='Select the populations of interest')||((rnaseq_population_option=='Select the populations of interest by organs')))&&(!rnaseq_population)) {
+					$("#AlertModal_population").modal('show');
+				}
+				else if(gene_info_gencode_GRCm38_synonyms.indexOf(rnaseq_gene) == -1) 
+				{
+					$("#AlertModal_genesymbol").modal('show');
+				}
+				else {
+					chart.selectAll("*").remove();
+					
+					var jsonText = $.ajax({                                         
+						type: 'POST',      
+						url: 'get_data.php',               
+						data: {'probeset_id': hashtable_synonyms[rnaseq_gene], 'datagroup': rnaseq_datagroup, 'population': rnaseq_population, 'key_population': rnaseq_population_option},
+						async: false
+					}).responseText;
+					
+					if(rnaseq_gene_source == 'URL'){
+						$.ajax({                                         
+								type: 'POST',      
+								url: 'save_logs.php',               
+								data: { 'gene': hashtable_synonyms[rnaseq_gene], 'populations': rnaseq_population, 'datagroup': rnaseq_datagroup, 'key_population': rnaseq_population_option, 'search_type': 'URL' },
+								cache: false
+		        		});
+		        	} else if (rnaseq_gene_source == 'Input'){
+						$.ajax({                                         
+								type: 'POST',      
+								url: 'save_logs.php',               
+								data: { 'gene': hashtable_synonyms[rnaseq_gene], 'populations': rnaseq_population, 'datagroup': rnaseq_datagroup, 'key_population': rnaseq_population_option, 'search_type': 'Input' },
+								cache: false
+		        		});
+		        	}
+		        
+					var results = JSON.parse(jsonText); 
+					var meta_info = results.meta;
+					var kegg_info = results.kegg;
+					//var reactome_info = results.reactome;
+					var go_info = results.go;
+					var orthology_info = results.orthology;
+					var biolegend_info = results.biolegend;
+					var dataset = results.data;
+					var max = results.max;
+					var pop_group_num = results.pop_group_num;
+					
+					var rowlabel_font_size;
+					if(dataset.length > 0 && dataset.length <= 20) {
+						rowlabel_font_size = 14;
+					} 
+					else if(dataset.length > 20 && dataset.length <= 40) {
+						rowlabel_font_size = 13;
+					} 
+					else if(dataset.length > 40 && dataset.length <= 60) {
+						rowlabel_font_size = 12;
+					}
+					else if(dataset.length > 60 && dataset.length <= 80){
+						rowlabel_font_size = 11;
+					}
+					else if(dataset.length > 80 && dataset.length <= 100){
+						rowlabel_font_size = 10;
+					}
+					else if(dataset.length > 100 && dataset.length <= 120){
+						rowlabel_font_size = 9;
+					}
+					else if(dataset.length > 120 && dataset.length <= 140){
+						rowlabel_font_size = 8;
+					}
+					else if(dataset.length > 140 && dataset.length <= 160){
+						rowlabel_font_size = 7;
+					}
+					else {
+						rowlabel_font_size = 6;
+					}
+					
+					document.getElementById('rnaseq_meta_info').style.display="";
+					document.getElementById('chart_card').setAttribute("class", "col-12 col-lg-8 card border-0 shadow p-3 mb-5 bg-white rounded");
+					$('html,body').animate({ scrollTop: $("#hr").offset().top},'slow');
+					//document.getElementById('rnaseq_summary_note').style.display="";
+					//document.getElementById('rnaseq_go_note').style.display="";
+					//document.getElementById('rnaseq_save_option').style.display="";
+					document.getElementById('rnaseq_gene_symbol').innerHTML = meta_info["Gene_Symbol_MGI"];
+					document.getElementById('rnaseq_gene_name').innerHTML = meta_info["GeneName"];
+					document.getElementById('rnaseq_synonyms').innerHTML = meta_info["Synonyms"].replace(/\|/g, "; ");
+					document.getElementById('rnaseq_type').innerHTML = meta_info["Feature_type"];
+					document.getElementById('rnaseq_linkout').innerHTML = "";
+					if(!orthology_info["Summary"] || orthology_info["Summary"] == 'NA'){
+						document.getElementById('rnaseq_summary').innerHTML = 'NA';
+						document.getElementById("rnaseq_summary").style.height = "auto";
+					}
+					else {
+						document.getElementById('rnaseq_summary').innerHTML = orthology_info["Summary"];
+						if(window.outerHeight <= 800){
+							document.getElementById("rnaseq_summary").style.height = "80px";
+						}
+						else {
+							document.getElementById("rnaseq_summary").style.height = "180px";	
+						}
+					}
+					if(meta_info["Chr"] == 'NA' ) {
+						document.getElementById('rnaseq_seq_map').innerHTML = 'NA';
+					}
+					else {
+						document.getElementById('rnaseq_seq_map').innerHTML = 'Chr' + meta_info["Chr"] + ':' + meta_info["Start"] + '-' + meta_info["End"] + ', ' + meta_info["Strand"] + ' strand';
+					}
+					if(meta_info["Entrez_Gene_ID"] == 'NA'){
+						//document.getElementById('rnaseq_ncbi_id').innerHTML = 'NA';
+					}
+					else {
+						document.getElementById('rnaseq_linkout').innerHTML = '<a href="https://www.ncbi.nlm.nih.gov/gene/' + meta_info["Entrez_Gene_ID"] + '" target="_blank"><img src="images/ncbi_logo.jpg" alt="NCBI" height="35" title="NCBI"></a>';
+					
+					}
+					if(meta_info["Ensembl_ID"] == 'NA'){
+						//document.getElementById('rnaseq_ensembl_id').innerHTML = 'NA';
+					}
+					else {
+						document.getElementById('rnaseq_linkout').innerHTML += '&emsp;<a href="http://www.ensembl.org/Mus_musculus/geneview?gene=' + meta_info["Ensembl_ID"] + '" target="_blank"><img src="images/ensembl_logo.png" alt="Ensembl" height="30" title="Ensembl"></a>';
+					}
+					if(!orthology_info["Human_GeneSymbol"] || orthology_info["Human_GeneSymbol"] == 'NA'){
+						human_orthology_gene = orthology_info["Human_GeneSymbol"];
+						document.getElementById('rnaseq_human_orthology').innerHTML = 'NA';
+					}
+					else{
+						human_orthology_gene = orthology_info["Human_GeneSymbol"];
+						document.getElementById('rnaseq_human_orthology').innerHTML = '<a href="https://www.ncbi.nlm.nih.gov/gene/' + orthology_info["Human_EntrezID"] + '" target="_blank">' + orthology_info["Human_GeneSymbol"] + '</a>';
+					}
+					document.getElementById('rnaseq_linkout').innerHTML += '&emsp;<a href="https://www.alliancegenome.org/gene/' + meta_info["MGI_ID"] + '" target="_blank"><img src="images/alliance_logo.jpg" alt="Alliance" height="28" title="Alliance"></a>';
+					document.getElementById('rnaseq_linkout').innerHTML += '&NewLine;&emsp;<a href="https://www.proteinatlas.org/' + orthology_info["Human_EnsemblID"] + '-' + orthology_info["Human_GeneSymbol"] + '" target="_blank"><img src="images/HPA_logo.png" alt="HPA" height="20" title="The Human Protein Atlas"></a>';
+					
+					if(biolegend_info["Pathway"]){
+						document.getElementById('rnaseq_linkout').innerHTML += '&emsp;<a href="https://www.biolegend.com/en-us/' + biolegend_info["Pathway"] + '" target="_blank"><img src="images/biolegend_logo.png" alt="BioLegend" height="30" title="BioLegend"></a>';
+					}
+					
+					var go_text='';
+					for(var g = 0; g < go_info.length; g++){
+						go_text = go_text + '<a href="http://amigo.geneontology.org/amigo/term/' + go_info[g]['go_id'] + '" target="_blank">' + go_info[g]['go_name'] + ' (' + go_info[g]['go_category'] + ')</a><br>';
+					}
+					if(go_info.length){
+						document.getElementById('rnaseq_GO').innerHTML = go_text;
+						if(window.outerHeight <= 800){
+							document.getElementById("rnaseq_GO").style.height = "85px";
+						}
+						else {
+							document.getElementById("rnaseq_GO").style.height = "180px";
+						}						
+						document.getElementById('rnaseq_GO_showAll').style.display="";
+					}
+					else{
+						document.getElementById('rnaseq_GO').innerHTML = 'N/A';
+						document.getElementById("rnaseq_GO").style.height = "auto";
+						document.getElementById('rnaseq_GO_showAll').style.display="none";
+					}
+					document.getElementById('rnaseq_GO_showAll').innerHTML = '<p><b>Show All:</b>&#9;&#9;<a href="http://www.informatics.jax.org/go/marker/' + meta_info["MGI_ID"] + '#tabular" target="_blank">Tablular View</a>&#9;|&#9;<a href="http://www.informatics.jax.org/marker/gograph/' + meta_info["MGI_ID"] + '" target="_blank">Graph View</a></p>';
+					
+					var kegg_text='';
+					for(var k = 0; k < kegg_info.length; k++){
+						kegg_text = kegg_text + '<a href="http://www.genome.jp/kegg-bin/show_pathway?' + kegg_info[k]['kegg_id'] + '+' + meta_info["Entrez_Gene_ID"] + '" target="_blank">' + kegg_info[k]['kegg_name'] + '</a><br>';
+					}
+					if(kegg_info.length){
+						document.getElementById('rnaseq_kegg').innerHTML = kegg_text;
+						
+						if(window.outerHeight <= 800){
+							document.getElementById("rnaseq_kegg").style.height = "85px";
+						}
+						else {
+							document.getElementById("rnaseq_kegg").style.height = "150px";
+						}
+					}
+					else{
+						document.getElementById('rnaseq_kegg').innerHTML = 'N/A';
+						document.getElementById("rnaseq_kegg").style.height = "auto";
+					}
+					
+					//////////////////////////////////////////////////////////////////////////////
+					var yScale = d3.scaleBand()
+							.domain(dataset.map(function(d) { return d.short_name; }))
+							.rangeRound([0, height]);
+    				                                
+					var xScale;
+					if(rnaseq_scale_option =='Local'){
+						xScale = d3.scaleLinear().nice()
+    							.domain([0, d3.max(dataset, function(d) { return d.value; })>0.1 ? d3.max(dataset, function(d) { return d.value; })*1.05 : 10]) 
+    							.range([0, width]);
+    					}
+    					else if(rnaseq_scale_option =='Global'){
+						xScale = d3.scaleLinear().nice()
+    							.domain([0, max]) 
+    							.range([0, width]);
+    					}
+    					else if(rnaseq_scale_option =='Local (log10)'){
+						xScale = d3.scaleLog().base(10).nice()
+    							.domain([1, d3.max(dataset, function(d) { return d.value; })>0.1 ? d3.max(dataset, function(d) { return d.value; })*2 : 10]) 
+    							.range([0, width]);
+    					}
+    					else if(rnaseq_scale_option =='Global (log10)'){
+						xScale = d3.scaleLog().base(10).nice()
+    							.domain([1, max*2]) 
+    							.range([0, width]);
+    					}
+    					
+    					chart.append("text")
+    						.attr("x", width/2 + margin.left)             
+    						.attr("y", margin.top/5)
+    						.attr("text-anchor", "middle")
+    						.style("font-size", "15px")
+    						.style("font-weight", "bold")
+    						.style("font-family", "sans-serif")
+    						.text(description1)
+    						.on("mouseover", function(d) {
+    							d3.select(this).style("fill", "blue");
+    							d3.select(this).style("font-size", "16px");
+    							d3.select(this).style("cursor", "hand");
+    						})
+    						.on("mouseout", function(d) {
+    							d3.select(this).style("fill", "black");
+    							d3.select(this).style("font-size", "15px");
+    						})
+    						.on("click", function(){
+    							if(rnaseq_gene.includes('Alias')){
+    								window.open("https://www.ncbi.nlm.nih.gov/gene/?term=" + rnaseq_gene.split("Alias of ")[1].slice(0,-1), '_blank');
+    								window.focus();
+    							}
+    							else {
+    								window.open("https://www.ncbi.nlm.nih.gov/gene/?term=" + rnaseq_gene, '_blank');
+    								window.focus();
+    							}
+    						})
+    						.append('title')
+    						.text("Click to show gene information");
+    						
+    					chart.append("text")
+    						.attr("x", width/2 + margin.left)             
+    						.attr("y", 3*margin.top/5)
+    						.attr("text-anchor", "middle")
+    						.style("font-size", "13px")
+    						.style("font-family", "sans-serif")
+    						.text(description2);		
+    					
+    					chart.append("text")
+    						.attr("x", margin.left - 85)
+    						.attr("y", height + margin.top + margin.bottom - 30)
+    						.attr("text-anchor", "middle")
+    						.style("font-weight", "bold")
+    						.style("font-size", "13px")
+    						.style("font-family", "sans-serif")
+    						.text("Expression Value Range");
+    							
+    					var legend_bar = chart.append("g").attr("class","g2")
+    							.selectAll(".legendg")
+    							.data(datavars)  
+    							.enter()
+    							.append("rect")
+						.attr("width", function(d){ return xScale(d);})
+						.attr("x", function(d, i){ 
+							if((rnaseq_scale_option =='Global (log10)')||(rnaseq_scale_option =='Local (log10)')){
+								return margin.left + xScale(prev_width_log[i]);
+							}
+							else {
+								return margin.left + xScale(prev_width[i]);
+							}
+						})
+						.attr("fill", function(d, i){ return colors[i]; })
+						.attr("y", margin.top + height + 15)
+						.attr("height", 20)
+						.on("mouseover", function(d, i) {
+    						
+    							var xPosition = d3.event.pageX+10;  
+    							var yPosition = d3.event.pageY+10;
+    							if((window.innerWidth-xPosition) < 400) xPosition = xPosition - 100;                                                                 
+    							if((window.innerHeight-yPosition) < 150) yPosition = yPosition - 60;
+    							
+    								d3.select(this).style("fill", "#454545");
+    								
+    								//Update the tooltip position and value
+  	             						d3.select("#tooltip_legend")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top",  yPosition + "px")
+  	             						  .select("#level")
+  	             						  .text(legend[i][0]);      
+  	             						
+  	             						  d3.select("#tooltip_legend")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top",  yPosition + "px")
+  	             						  .select("#level_range")
+  	             						  .text(legend[i][1]); 
+  	             						  
+  	             						//Show the tooltip
+  	             						d3.select("#tooltip_legend").classed("hidden", false);
+    							//}
+    						})
+    						.on("mouseout", function(d,i) {
+    							
+    							d3.select(this).style("fill", colors[i]);
+    							d3.select("#tooltip_legend").classed("hidden", true);  
+    						});
+						
+    					var xAxis;
+    					if((rnaseq_scale_option =='Global (log10)')||(rnaseq_scale_option =='Local (log10)')){
+    						xAxis = d3.axisTop()
+    							.scale(xScale)
+    							.tickSizeInner(-height)
+    							.tickSizeOuter(0)
+    							.tickPadding(5)
+    							.tickFormat(d3.format(",d"))
+    							.tickValues([1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000]);
+    					}
+    					else {
+    						xAxis = d3.axisTop()
+    							.scale(xScale)
+    							.tickSizeInner(-height)
+    							.tickSizeOuter(0)
+    							.tickPadding(5)
+    							.tickFormat(d3.format(",d"))
+    							.ticks(Math.min(10, (xScale.domain()[1] - xScale.domain()[0])));
+    					}
+    					
+    					var yAxis = d3.axisLeft()                         
+    							.scale(yScale);	
+    					
+    					var bar = chart.append("g").attr("class","g1")
+    							.selectAll(".barg")
+    							.data(dataset)  
+    							.enter()
+    							.append("rect")
+    							.attr("transform", function(d, i){
+    								return "translate(0, "+yScale(d.short_name)+")";
+    							})
+    						.attr("y", function(d,i){
+    							return  margin.top + yScale.bandwidth()/16;
+    						})
+    						.attr("height", yScale.bandwidth()*7/8)
+    						.attr("x", margin.left)
+    						.style("fill", function(d) { if(pop_group_num>1) { return d.color;} else { return d.color_unique_set;} })
+    						.on("mouseover", function(d) {
+    						
+    							var xPosition = d3.event.pageX+10;  
+    							var yPosition = d3.event.pageY+10;
+    							if((window.innerWidth-xPosition) < 400) xPosition = xPosition - 400;                                                                 
+    							if((window.innerHeight-yPosition) < 150) yPosition = yPosition - 150;
+    							
+    								d3.select(this).style("fill", "#454545");
+    								//Update the tooltip position and value
+  	             						d3.select("#tooltip")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top",  yPosition + "px")
+  	             						  .select("#population")
+  	             						  .text(d.short_name);      
+  	             						
+  	             						d3.select("#tooltip")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#expr_value")
+  	             						  .text(d.value);
+  	             						  
+  	             						d3.select("#tooltip")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#long_name")
+  	             						  .text(d.long_name);
+  	             						
+  	             						d3.select("#tooltip")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#desc")
+  	             						  .text(d.description);
+  	             						  
+  	             						d3.select("#tooltip")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#author")
+  	             						  .text(d.author);
+  	             						  
+  	             						d3.select("#tooltip")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#number_of_sample")
+  	             						  .text(d.number_of_sample);
+  	             						  
+  	             						//Show the tooltip
+  	             						d3.select("#tooltip").classed("hidden", false);
+    							
+    						})
+    						.on("mouseout", function(d) {
+    							
+    							d3.select(this).style("fill", function(d) { if(pop_group_num>1) { return d.color;} else { return d.color_unique_set;} });
+    							d3.select("#tooltip").classed("hidden", true);  
+    						})
+    						.transition().delay(function (d,i){ return Math.floor(i/2) * 30;})
+    						.duration(500)
+    						.attr("width", function(d) { 
+    							if((rnaseq_scale_option =='Global (log10)')||(rnaseq_scale_option =='Local (log10)')){
+    								if((xScale(d.value) - xScale(1)) > 0) {
+    									return xScale(d.value) - xScale(1); 
+    								}
+    								else {
+    									return 0;
+    								}
+    							}
+    							else {
+    								return xScale(d.value) - xScale(d.start); 
+    							}
+    						});
+    					
+    					    						
+    					var x_axis = chart.append("g")
+    							.attr("class", "x axis")
+    							.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    							.style("font-size", "10.5px")
+    							.call(xAxis);
+    					
+    					var y_axis = chart.append("g")
+    							.attr("class", "y axis")
+    							.attr("transform", function(d,i){
+    								return  "translate(" + margin.left + "," + margin.top + ")";
+    							})
+    							.style("font-size", rowlabel_font_size + "px")
+    							.call(yAxis);
+    					                                                                                                                   
+    				d3.selectAll('.y.axis .tick').append('title').text("Click to show sorting information");
+ 					
+ 					d3.selectAll('.y.axis .tick')
+ 						.data(dataset)
+ 						.on("mouseover", function(d) {
+ 							var xPosition = d3.event.pageX+10;  
+    							var yPosition = d3.event.pageY+10;
+    							if((window.innerWidth-xPosition) < 400) xPosition = xPosition - 400;                                                                 
+    							if((window.innerHeight-yPosition) < 150) yPosition = yPosition - 150;
+    							
+    								d3.select("#tooltip_y_axis")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top",  yPosition + "px")
+  	             						  .select("#population_y_axis")
+  	             						  .text(d.short_name);      
+  	             						  	             						  
+  	             						d3.select("#tooltip_y_axis")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#long_name_y_axis")
+  	             						  .text(d.long_name);
+  	             						
+  	             						d3.select("#tooltip_y_axis")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#desc_y_axis")
+  	             						  .text(d.description);
+  	             						  
+  	             						d3.select("#tooltip_y_axis")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#author_y_axis")
+  	             						  .text(d.author);
+  	             						  
+  	             						d3.select("#tooltip_y_axis")
+  	             						  .style("left", xPosition + "px")
+  	             						  .style("top", yPosition + "px")
+  	             						  .select("#number_of_sample_y_axis")
+  	             						  .text(d.number_of_sample);
+  	             						
+  	             						d3.select("#tooltip_y_axis").classed("hidden", false);
+  	             						
+  	             						
+    							d3.select(this).style("fill", "red");
+    							d3.select(this).style("font-size", (rowlabel_font_size+1) + "px");
+    							d3.select(this).style("font-weight", "bold");
+    							d3.select(this).style("cursor", "hand");
+    						})
+    						.on("mouseout", function(d) {
+    						
+    							d3.select("#tooltip_y_axis").classed("hidden", true);  
+    							
+    							d3.select(this).style("font-size", rowlabel_font_size + "px");
+    							d3.select(this).style("font-weight", "normal");
+    						})
+    						.on("click", function(d) {
+    							if(d.sorting_info=='1'){
+    								if(rnaseq_datagroup == 'ImmGen ULI RNASeq'){
+    									window.open("resources/Sorting_PDFs_ATAC/" + d.population + '.pdf', '_blank');
+    									window.focus();
+    								}
+    								else if(rnaseq_datagroup == 'ImmGen MNP OpenSource'){
+    									window.open("resources/Sorting_PDFs_OSMNP/" + d.short_name + '.pdf', '_blank');
+    									window.focus();
+    								}
+    							}
+    							else{
+    								$("#AlertModal_sorting_info").modal('show');
+    							}
+    						});
+					
+				}
+			});
+			
+			    			
+			////////////////////////////////////////////////////////////////
+			$("#microarray_skyline_btn").click(function() { 
+    				var rnaseq_gene = $("#rnaseq_Gene").val();
+					
+				window.open( 'http://rstats.immgen.org/Skyline_microarray/skyline.html?gene=' + hashtable_synonyms[rnaseq_gene] );
+			});
+						
+			$("#gene_constellation_btn").click(function() { 
+    				var rnaseq_gene = $("#rnaseq_Gene").val();
+					
+				window.open( 'http://rstats.immgen.org/GeneConstellation/index.html?gene=' + hashtable_synonyms[rnaseq_gene] );
+			});
+			
+			$("#chromatin_btn").click(function() { 
+				var rnaseq_gene = $("#rnaseq_Gene").val();
+    				window.open( 'http://rstats.immgen.org/Chromatin/chromatin.html?gene=' + hashtable_synonyms[rnaseq_gene] );
+			});
+			
+			$("#enhancer_network_btn").click(function() { 
+				var rnaseq_gene = $("#rnaseq_Gene").val();
+    				window.open( 'http://rstats.immgen.org/EnhancerControl/index.html?gene=' + hashtable_synonyms[rnaseq_gene] );
+			});
+			
+			$("#ICA_btn").click(function() { 
+    				window.open( 'http://immunecellatlas.net/ICA_Skyline.php?gene=' + human_orthology_gene + '&celltype=all&organ=Blood&datatype=rnaseq&scale=Local' );
+			});
+			////////////////////////////////////////////////////////////////
+			var canvas = document.getElementById('canvas_id');
+			
+			$("#immgen_uli_rnaseq_save_expr").click(function() { 
+				var rnaseq_datagroup = $("#rnaseq_datagroup_list label.active input").val();
+    			var rnaseq_gene = $("#rnaseq_Gene").val();
+				var rnaseq_population_option = $("#rnaseq_population_list label.active input").val();
+				var rnaseq_population;
+				if(rnaseq_population_option=='Select the populations of interest'){
+					rnaseq_population = $("#rnaseq_group").text();
+				}
+				else if(rnaseq_population_option=='Select the populations of interest by organs'){
+					rnaseq_population = $("#rnaseq_group_by_organ").text();
+				}
+					
+				window.open( 'http://rstats.immgen.org/Skyline/download_expr_table.php?type=rnaseq&id=' + hashtable_synonyms[rnaseq_gene] + '&datagroup=' + rnaseq_datagroup + '&population=' + rnaseq_population + '&key_population=' + rnaseq_population_option );
+			});
+			$("#immgen_uli_rnaseq_save_meta").click(function() { 
+				var rnaseq_datagroup = $("#rnaseq_datagroup_list label.active input").val();
+    			var rnaseq_gene = $("#rnaseq_Gene").val();
+				var rnaseq_population_option = $("#rnaseq_population_list label.active input").val();
+				var rnaseq_population;
+				if(rnaseq_population_option=='Select the populations of interest'){
+					rnaseq_population = $("#rnaseq_group").text();
+				}
+				else if(rnaseq_population_option=='Select the populations of interest by organs'){
+					rnaseq_population = $("#rnaseq_group_by_organ").text();
+				}
+				
+				window.open( 'http://rstats.immgen.org/Skyline/download_meta_table.php?type=rnaseq&id=' + rnaseq_gene + '&datagroup=' + rnaseq_datagroup + '&population=' + rnaseq_population + '&key_population=' + rnaseq_population_option );
+			});
+			$("#immgen_uli_rnaseq_save_as_svg").click(function() { 
+				if (/*@cc_on!@*/false || !!document.documentMode) {
+					$("#AlertModal_IE_save_image").modal('show');
+				}
+				else {
+					var svgString = new XMLSerializer().serializeToString(document.getElementById("chart").getElementsByTagName("svg")[0]),
+					blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"}),
+					url = window.URL.createObjectURL(blob);
+					
+					var a = document.createElement('a');
+					a.href = url;
+					a.download = 'Gene_Skyline.svg';
+					document.body.appendChild(a);
+					a.click();
+				}
+			});
+			$("#immgen_uli_rnaseq_save_as_png").click(function() {
+				if (/*@cc_on!@*/false || !!document.documentMode) {
+					$("#AlertModal_IE_save_image").modal('show');
+				}
+				else {
+					var svgString = new XMLSerializer().serializeToString(document.getElementById("chart").getElementsByTagName("svg")[0]),
+					    blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"}),
+					    url = window.URL.createObjectURL(blob);
+					      
+					var img = d3.select('body').append('img').classed('exportImg', true).node();
+					img.onload = function () {
+						var canvas = document.createElement('canvas'),
+						ctx = canvas.getContext('2d');
+						canvas.width = width + margin.left + margin.right + 50;
+						canvas.height = height + margin.top + margin.bottom + 50;
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+						d3.select('img.exportImg').remove();
+						
+						// create link
+						var a = document.createElement('a');
+						a.href = canvas.toDataURL();
+						a.download = 'Gene_Skyline.png';
+						document.body.appendChild(a);
+						a.click();
+					};
+					img.src = url;
+				}
+			});
+			$("#immgen_uli_rnaseq_save_as_pdf").click(function() {
+				if (/*@cc_on!@*/false || !!document.documentMode) {
+					$("#AlertModal_IE_save_pdf").modal('show');
+				}
+				else {
+					var svgString = new XMLSerializer().serializeToString(document.getElementById("chart").getElementsByTagName("svg")[0]),
+					    blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"}),
+					    url = window.URL.createObjectURL(blob);
+					      
+					var img = d3.select('body').append('img').classed('exportImg', true).node();
+					img.onload = function () {
+						var canvas = document.createElement('canvas'),
+						ctx = canvas.getContext('2d');
+						canvas.width = width + margin.left + margin.right + 50;
+						canvas.height = height + margin.top + margin.bottom + 50;
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+						d3.select('img.exportImg').remove();
+						
+						// create link
+						var imgData = canvas.toDataURL('image/png');
+						var doc = new jsPDF('l', 'mm', 'letter');
+						doc.addImage(imgData, 'PNG', 0, 10, doc.internal.pageSize.width-10, doc.internal.pageSize.height-10, null, 'NONE');
+						doc.save('Gene_Skyline.pdf');
+					};
+					img.src = url;
+				}
+			});
+			$("#immgen_uli_rnaseq_print").click(function() { print_div(); });
+			$("#immgen_uli_rnaseq_email").click(function() {
+				$("#EmailModal").modal('show');
+			});
+			
+			
+					
+			$("#immgen_OSMNP_uli_rnaseq_save_expr").click(function() { 
+				var rnaseq_datagroup = $("#rnaseq_datagroup_list label.active input").val();
+    			var rnaseq_gene = $("#rnaseq_Gene").val();
+				var rnaseq_population_option = $("#rnaseq_population_list label.active input").val();
+				var rnaseq_population;
+				if(rnaseq_population_option=='Select the populations of interest'){
+					rnaseq_population = $("#rnaseq_OSMNP_group").text();
+				}
+				else if(rnaseq_population_option=='Select the populations of interest by organs'){
+					rnaseq_population = $("#rnaseq_OSMNP_group_by_organ").text();
+				}
+					
+				window.open( 'http://rstats.immgen.org/Skyline/download_expr_table.php?type=rnaseq&id=' + hashtable_synonyms[rnaseq_gene] + '&datagroup=' + rnaseq_datagroup + '&population=' + rnaseq_population + '&key_population=' + rnaseq_population_option );
+			});
+			$("#immgen_OSMNP_uli_rnaseq_save_meta").click(function() { 
+				var rnaseq_datagroup = $("#rnaseq_datagroup_list label.active input").val();
+    			var rnaseq_gene = $("#rnaseq_Gene").val();
+				var rnaseq_population_option = $("#rnaseq_population_list label.active input").val();
+				var rnaseq_population;
+				if(rnaseq_population_option=='Select the populations of interest'){
+					rnaseq_population = $("#rnaseq_OSMNP_group").text();
+				}
+				else if(rnaseq_population_option=='Select the populations of interest by organs'){
+					rnaseq_population = $("#rnaseq_OSMNP_group_by_organ").text();
+				}
+					
+				window.open( 'http://rstats.immgen.org/Skyline/download_meta_table.php?type=rnaseq&id=' + rnaseq_gene + '&datagroup=' + rnaseq_datagroup + '&population=' + rnaseq_population + '&key_population=' + rnaseq_population_option );
+			});
+			$("#immgen_OSMNP_uli_rnaseq_save_as_svg").click(function() { 
+				if (/*@cc_on!@*/false || !!document.documentMode) {
+					$("#AlertModal_IE_save_image").modal('show');
+				}
+				else {
+					var svgString = new XMLSerializer().serializeToString(document.getElementById("chart").getElementsByTagName("svg")[0]),
+					blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"}),
+					url = window.URL.createObjectURL(blob);
+					
+					var a = document.createElement('a');
+					a.href = url;
+					a.download = 'Gene_Skyline.svg';
+					document.body.appendChild(a);
+					a.click();
+				}
+			});
+			$("#immgen_OSMNP_uli_rnaseq_save_as_png").click(function() {
+				if (/*@cc_on!@*/false || !!document.documentMode) {
+					$("#AlertModal_IE_save_image").modal('show');
+				}
+				else {
+					var svgString = new XMLSerializer().serializeToString(document.getElementById("chart").getElementsByTagName("svg")[0]),
+					    blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"}),
+					    url = window.URL.createObjectURL(blob);
+					      
+					var img = d3.select('body').append('img').classed('exportImg', true).node();
+					img.onload = function () {
+					 	var canvas = document.createElement('canvas'),
+					    	ctx = canvas.getContext('2d');
+					    	canvas.width = width + margin.left + margin.right + 50;
+					    	canvas.height = height + margin.top + margin.bottom + 50;
+					    	ctx.clearRect(0, 0, canvas.width, canvas.height);
+					    	ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+					    	d3.select('img.exportImg').remove();
+					    	
+					    	// create link
+					    	var a = document.createElement('a');
+					    	a.href = canvas.toDataURL();
+					    	a.download = 'Gene_Skyline.png';
+					    	document.body.appendChild(a);
+					    	a.click();
+					};
+					img.src = url;
+				}
+			});
+			$("#immgen_OSMNP_uli_rnaseq_save_as_pdf").click(function() { 
+				if (/*@cc_on!@*/false || !!document.documentMode) {
+					$("#AlertModal_IE_save_pdf").modal('show');
+				}
+				else {
+					var svgString = new XMLSerializer().serializeToString(document.getElementById("chart").getElementsByTagName("svg")[0]),
+					    blob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"}),
+					    url = window.URL.createObjectURL(blob);
+					      
+					var img = d3.select('body').append('img').classed('exportImg', true).node();
+					img.onload = function () {
+						var canvas = document.createElement('canvas'),
+						ctx = canvas.getContext('2d');
+						canvas.width = width + margin.left + margin.right + 50;
+						canvas.height = height + margin.top + margin.bottom + 50;
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+						d3.select('img.exportImg').remove();
+						
+						// create link
+						var imgData = canvas.toDataURL('image/png');
+						var doc = new jsPDF('l', 'mm', 'letter');
+						doc.addImage(imgData, 'PNG', 0, 10, doc.internal.pageSize.width-10, doc.internal.pageSize.height-10, null, 'NONE');
+						doc.save('Gene_Skyline.pdf');
+					};
+					img.src = url;
+				}
+			});
+			$("#immgen_OSMNP_uli_rnaseq_print").click(function() { print_div(); });
+			$("#immgen_OSMNP_uli_rnaseq_email").click(function() { 
+				$("#EmailModal").modal('show');
+			});
+			
+			
+			$( '#sendMailForm' ).submit(function ( e ) {
+				e.preventDefault();
+			    	
+				var msg;
+			    	if($('#message-text').val()) { 
+			    		msg = $('#message-text').val(); 
+			    	} else { 
+			    		msg = "Here is a Gene Skyline plot from ImmGen.";
+			    	}
+			    	
+			    	html2canvas(document.getElementById('chart'), {
+            				width: document.getElementById("chart").offsetWidth + 50,
+            				height: window.innerHeight + 550,
+            				y: margin.top
+            				}).then(function (canvas) {
+						var imagedata = canvas.toDataURL('image/png');
+						var imgdata = imagedata.replace(/^data:image\/(png|jpg);base64,/, "");
+						
+ 						$.ajax({
+ 							type: 'POST',
+ 							url: 'email.php',
+ 							data: { imgdata:imgdata, from_email: $('#from_email').val(), to_email: $('#to_email').val(), msg: msg, gene: $("#rnaseq_Gene").val() },
+ 							success: function (data) {
+							    // For Notification
+			        			    document.getElementById("sendMailForm").reset();
+			        			    var $alertDiv = $(".mailResponse");
+			        			    $alertDiv.show();
+			        			    $alertDiv.find('.alert').removeClass('alert-danger alert-success');
+			        			    $alertDiv.find('.mailResponseText').text("");
+			        			    if(data.error){
+			        			        $alertDiv.find('.alert').addClass('alert-danger');
+			        			        $alertDiv.find('.mailResponseText').text("Failed! Please send the email again.");
+			        			    }else{
+			        			        $alertDiv.find('.alert').addClass('alert-success');
+			        			        $alertDiv.find('.mailResponseText').text("The email is sent successfully!");
+			        			    }
+			        			}
+ 						});
+ 				});
+			});
+			
+    		//});
+    		
+    		
+		////////////////////////////////////////////////////////////////
+		
+      		function submit_download_form(output_format)
+      		{
+			// Get the d3js SVG element
+			var tmp = document.getElementById("chart");
+			var svg = tmp.getElementsByTagName("svg")[0];
+			// Extract the data as SVG text string
+			var svg_xml = (new XMLSerializer).serializeToString(svg);
+                	
+			// Submit the <FORM> to the server.
+			// The result will be an attachment file to download.
+			var form = document.getElementById("svgform");
+			form['output_format'].value = output_format;
+			form['data'].value = svg_xml ;
+			form.submit();
+		}
+		
+		function setDPI(canvas, dpi) {
+			var scaleFactor = dpi / 96;
+			canvas.width = Math.ceil(canvas.width * scaleFactor);
+			canvas.height = Math.ceil(canvas.height * scaleFactor);
+			var ctx=canvas.getContext("2d");
+			ctx.scale(scaleFactor, scaleFactor);
+		}
+		
+		function print_div() {
+			var printContents = document.getElementById("chart").innerHTML;
+			var originalContents = document.body.innerHTML;
+			
+			document.body.innerHTML = printContents;
+			window.print();
+			window.location.reload();
+		}
+		
+		function prepareEmail(to, subject, bodyText) {
+			var form = document.createElement('form');
+			
+			//Set the form attributes 
+			form.setAttribute('method', 'post');
+			form.setAttribute('enctype', 'text/plain');
+			form.setAttribute('action', 'mailto:' + encodeURIComponent(to) + '?Subject=' + encodeURIComponent(subject) + '&Body=' + encodeURIComponent(bodyText ? bodyText : ' '));
+			form.setAttribute('style', 'display:none');
+			
+			//Append the form to the body
+			document.body.appendChild(form);
+		 
+			//Submit the form
+			form.submit();
+			
+			//Clean up
+			document.body.removeChild(form);
+		}
+		
+		function refresh_rnaseq_genelist() {
+		
+			if($('#alias_option').is(':checked')){
+				genes_gencode_GRCm38 = new Bloodhound({
+					datumTokenizer: Bloodhound.tokenizers.whitespace,
+					queryTokenizer: Bloodhound.tokenizers.whitespace,
+					local: gene_info_gencode_GRCm38_synonyms
+				});
+				$('#rnaseq_GeneList .typeahead').typeahead('destroy');
+				$('#rnaseq_GeneList .typeahead').typeahead({
+				  hint: true,
+				  highlight: true,
+				  minLength: 1
+				},
+				{
+				  name: 'genes',
+				  limit: 100,
+				  source: genes_gencode_GRCm38
+				});
+			}
+			else {
+				genes_gencode_GRCm38 = new Bloodhound({
+					datumTokenizer: Bloodhound.tokenizers.whitespace,
+					queryTokenizer: Bloodhound.tokenizers.whitespace,
+					local: gene_info_gencode_GRCm38
+				});
+				$('#rnaseq_GeneList .typeahead').typeahead('destroy');
+				$('#rnaseq_GeneList .typeahead').typeahead({
+				  hint: true,
+				  highlight: true,
+				  minLength: 1
+				},
+				{
+				  name: 'genes',
+				  limit: 100,
+				  source: genes_gencode_GRCm38
+				});
+			}
+		}
+		
+		$(window).scroll(function() {
+		    var height = $(window).scrollTop();
+		    if (height > 100) {
+		        $('#back2Top').fadeIn();
+		    } else {
+		        $('#back2Top').fadeOut();
+		    }
+		});
+		
+		$(document).ready(function() {
+		    $("#back2Top").click(function(event) {
+		        event.preventDefault();
+		        $("html, body").animate({ scrollTop: 0 }, "slow");
+		        return false;
+		    });		
+		});
+
+	</script>
+  
+</body>
+</html>
